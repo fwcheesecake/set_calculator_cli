@@ -97,6 +97,7 @@
             <properties>
               <editable value="false"/>
               <enabled value="true"/>
+              <font name="Consolas"/>
               <lineWrap value="true"/>
             </properties>
           </component>

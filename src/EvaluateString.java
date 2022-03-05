@@ -12,14 +12,14 @@ public class EvaluateString
 		L3: {adskflj, dlsajf, jdfc, dxdkaj}
 		L4: {adfia, bsdfajl, asdjlf, jzxco}
 	*/
-	private static final HashMap<String, Lenguaje> lenguajes = new HashMap<>();
+	private static final HashMap<String, Language> lenguajes = new HashMap<>();
 
-	public static Lenguaje evaluate(String expression)
+	public static Language evaluate(String expression)
 	{
 		char[] tokens = expression.toCharArray();
 
 		// Pila para los lenguajes
-		Stack<Lenguaje> valores = new Stack<>();
+		Stack<Language> valores = new Stack<>();
 
 		// Pila para los operadores
 		Stack<Character> operadores = new Stack<>();
@@ -114,8 +114,8 @@ public class EvaluateString
 	// A utility method to apply an
 	// operator 'op' on operands 'a'
 	// and 'b'. Return the result.
-	public static Lenguaje applyOp(char op,
-								   Lenguaje b, Lenguaje a)
+	public static Language applyOp(char op,
+                                   Language b, Language a)
 	{
 		return switch (op) {
 			case 'Δ' -> difsim(a, b);
@@ -126,36 +126,36 @@ public class EvaluateString
 		};
 	}
 
-	private static Lenguaje union(Lenguaje a, Lenguaje b) {
-		Lenguaje resultado = new Lenguaje();
+	private static Language union(Language a, Language b) {
+		Language resultado = new Language();
 		resultado.addAll(a);
 		resultado.addAll(b);
 		return resultado;
 	}
-	private static Lenguaje interseccion(Lenguaje a, Lenguaje b) {
-		Lenguaje resultado = new Lenguaje();
+	private static Language interseccion(Language a, Language b) {
+		Language resultado = new Language();
 		resultado.addAll(a);
 		resultado.retainAll(b);
 		return resultado;
 	}
-	private static Lenguaje diferencia(Lenguaje a, Lenguaje b) {
-		Lenguaje resultado = new Lenguaje();
+	private static Language diferencia(Language a, Language b) {
+		Language resultado = new Language();
 		resultado.addAll(a);
 		resultado.removeAll(b);
 		return resultado;
 	}
-	private static Lenguaje difsim(Lenguaje a, Lenguaje b) {
-		Lenguaje op1 = union(a, b);
-		Lenguaje op2 = interseccion(a, b);
+	private static Language difsim(Language a, Language b) {
+		Language op1 = union(a, b);
+		Language op2 = interseccion(a, b);
 		return diferencia(op1, op2);
 	}
-	private static Lenguaje complemento(Lenguaje a) {
-		Lenguaje resultado = new Lenguaje();
+	private static Language complemento(Language a) {
+		Language resultado = new Language();
 		resultado.addAll(a);
 		return resultado;
 	}
-	private static Lenguaje producto(Lenguaje a, Lenguaje b) {
-		Lenguaje resultado = new Lenguaje();
+	private static Language producto(Language a, Language b) {
+		Language resultado = new Language();
 		resultado.addAll(a);
 		resultado.addAll(b);
 		return resultado;
@@ -163,9 +163,9 @@ public class EvaluateString
 
 	// Driver method to test above methods
 	public static void main(String[] args) {
-		lenguajes.put("L1", new Lenguaje(new String[]{"abc", "ac", "12"}));
-		lenguajes.put("L2", new Lenguaje(new String[]{"23", "12", "ab", "c2"}));
-		lenguajes.put("L3", new Lenguaje(new String[]{"23", "13", "a3", "ab"}));
+		lenguajes.put("L1", new Language(new String[]{"abc", "ac", "12"}));
+		lenguajes.put("L2", new Language(new String[]{"23", "12", "ab", "c2"}));
+		lenguajes.put("L3", new Language(new String[]{"23", "13", "a3", "ab"}));
 		Scanner sc = new Scanner(System.in);
 
 		System.out.println("Cuantos lenguajes quieres introducir?");

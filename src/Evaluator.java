@@ -1,87 +1,101 @@
+import exceptions.InvalidLanguageException;
+
 import java.util.Stack;
 
 public class Evaluator {
-    public static Lenguaje evaluate(String expression) {
-        //ArrayList<String> procedimiento = new ArrayList<>();
-        //procedimiento.add(expresion);
-
+    public static Language evaluate(String expression) throws InvalidLanguageException {
         char[] tokens = expression.toCharArray();
 
-        Stack<Character> operadores = new Stack<>();
-        Stack<Lenguaje> valores = new Stack<>();
+        Stack<Character> operators = new Stack<>();
+        Stack<Language> values = new Stack<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            if(tokens[i] == '\0' || tokens[i] == ' ')
+            if(tokens[i] == ' ')
                 continue;
 
-            //TODO inline laguages
+            //TODO validate language names. The mustn't start with a number
+            if(tokens[i] >= '0' && tokens[i] <= '9')
+                throw  new InvalidLanguageException("Syntax error. Language name must start with a letter");
 
             if ((tokens[i] >= 65 && tokens[i] <= 90) ||
                     (tokens[i] >= 97 && tokens[i] <= 122)) {
-                //Obtiene el nombre completo del lenguaje encontrado
+                //Obtains the full name of the found language
                 StringBuilder buf = new StringBuilder();
-                while (i < tokens.length && !esDelimitador(tokens[i])) {
+                while (i < tokens.length && !isDelimiter(tokens[i])) {
                     buf.append(tokens[i]);
                     i++;
                 }
 
-                Lenguaje op = new Lenguaje(Lenguajes.getOne(buf.toString()));
-                valores.push(op);
+                Language op = new Language(Languages.getOne(buf.toString()));
+                values.push(op);
                 i--;
             }
-            else if (tokens[i] == '(') {
-                operadores.push(tokens[i]);
+            else if(tokens[i] == '{') {
+                int ini = i + 1;
+                while(tokens[i] != '}')
+                    i++;
+                String subL = expression.substring(ini, i);
+
+                String[] subLSSplit = subL.split("\\s*,\\s*");
+                if(!Languages.isValid(subLSSplit)) {
+                    throw new InvalidLanguageException(" Invalid Inline language");
+                } else {
+                    values.push(new Language(subLSSplit));
+                }
+            } else if (tokens[i] == '(') {
+                operators.push(tokens[i]);
             }
             else if(tokens[i] == ')') {
-                while(operadores.peek() != '(')
-                    operacion(operadores, valores);
-                operadores.pop();
+                while(operators.peek() != '(')
+                    applyOp(operators, values);
+                operators.pop();
             }
-            else if (esOperador(tokens[i])) {
-                while(!operadores.isEmpty() && operadores.peek() != '(')
-                    operacion(operadores, valores);
-                operadores.push(tokens[i]);
+            else if (isOperator(tokens[i])) {
+                while(!operators.isEmpty() && operators.peek() != '(')
+                    applyOp(operators, values);
+                operators.push(tokens[i]);
             }
         }
 
-        while(!operadores.isEmpty())
-            operacion(operadores, valores);
+        while(!operators.isEmpty())
+            applyOp(operators, values);
 
-        return valores.pop();
+        return values.pop();
     }
 
-    private static void operacion(Stack<Character> operadores, Stack<Lenguaje> valores) {
-        char op = operadores.pop();
+    private static void applyOp(Stack<Character> operators, Stack<Language> values) {
+        char op = operators.pop();
 
-        Lenguaje b;
-        Lenguaje a;
+        Language b;
+        Language a;
 
-        b = new Lenguaje(valores.pop());
+        b = new Language(values.pop());
         if(op == '\'') {
-            valores.push(Lenguajes.complemento(b));
+            values.push(Languages.complement(b));
             return;
         }
-        a = new Lenguaje(valores.pop());
+        a = new Language(values.pop());
 
-        Lenguaje resultado = switch (op) {
-            case '∪' -> Lenguajes.union(a, b);
-            case '∩' -> Lenguajes.interseccion(a, b);
-            case '-' -> Lenguajes.diferencia(a, b);
-            case 'Δ' -> Lenguajes.difsim(a, b);
-            case '*' -> Lenguajes.producto(a, b);
+        Language result = switch (op) {
+            case '∪' -> Languages.union(a, b);
+            case '∩' -> Languages.intersection(a, b);
+            case '-' -> Languages.difference(a, b);
+            case 'Δ' -> Languages.symmetricalDifference(a, b);
+            case '*' -> Languages.product(a, b);
             default -> null;
         };
 
-        valores.push(resultado);
+        values.push(result);
     }
 
-    private static boolean esOperador(char token) {
+    private static boolean isOperator(char token) {
         return (token == '\'' || token == '*' || token == '∪' ||
                 token == '∩'  || token == 'Δ' || token == '-');
     }
-    private static boolean esDelimitador(char token) {
-        return (token == ' '  || token == '(' || token == ')' ||
-                token == '\'' || token == '*' || token == '∪' ||
-                token == '∩'  || token == 'Δ' || token == '-');
+    private static boolean isDelimiter(char token) {
+        return (token == ' '  || token == '{' || token == '}'  ||
+                token == '('  || token == ')' || token == '\'' ||
+                token == '*'  || token == '∪' || token == '∩'  ||
+                token == 'Δ'  || token == '-');
     }
 }
