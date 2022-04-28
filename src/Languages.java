@@ -56,6 +56,36 @@ public class Languages {
                 r.add(s + t);
         return r;
     }
+    public static Language kleeneClosure(Language a) {
+        //
+        Language r = new Language();
+
+        for(int i = 0; i <= 3; i++)
+            r.addAll(power(a, i));
+
+        return r;
+    }
+    public static Language positiveClosure(Language a) {
+        //ε
+        Language r = new Language();
+
+        for(int i = 1; i <= 3; i++)
+            r.addAll(power(a, i));
+
+        System.out.println(a.size());
+
+        return r;
+    }
+
+    private static Language power(Language a, int n) {
+        if(n == 0)
+            return new Language(new String[]{""});
+        Language r = new Language(a);
+        for(int i = 1; i < n; i++) {
+            r = product(a, r);
+        }
+        return r;
+    }
 
     public static boolean isValid(String[] values) {
         for (String value : values) {

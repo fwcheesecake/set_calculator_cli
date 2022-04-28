@@ -18,12 +18,12 @@ public class MainScreen {
     private JTextPane outputTextPane;
     private JTextField commandTextField;
     private JButton enterButton;
-    private JTextArea alphabetTextArea;
     private JPanel IOPanel;
     private JPanel dataPanel;
     private JLabel alphabetLabel;
     private JLabel languageLabel;
-    private JTextArea languagesTextArea;
+    private JTextPane languageTextPane;
+    private JTextPane alphabetTextPane;
 
     private enum Mode {TYPING, SHORTCUT}
     private Mode mode = Mode.TYPING;
@@ -51,7 +51,7 @@ public class MainScreen {
                         alphabet = alphabet.substring(1, alphabet.length() - 1);
                         for (String s : alphabet.split("\\s*,\\s*"))
                             Languages.addSymbol(s.charAt(0));
-                        alphabetTextArea.setText(rawInput);
+                        alphabetTextPane.setText(rawInput);
                         successLog(" Alphabet initialized successfully");
                     } else {
                         throw new InvalidAlphabetException(" The alphabet is already set");
@@ -74,7 +74,7 @@ public class MainScreen {
                 } else {
                     throw new InvalidLanguageException(" Invalid language");
                 }
-            } else if (rawInput.matches("[a-zA-Z][0-9]*\\s*=\\s*[a-zA-Z0-9\\sΔ\\-*∪∩'{,}()]+")) {
+            } else if (rawInput.matches("[a-zA-Z][0-9]*\\s*=\\s*[a-zA-Z0-9\\sΔ\\-*×+∪∩'{,}()]+")) {
                 //TODO new regex to validate L1 = {a, b,
 
                 String[] splitInput = rawInput.split("\\s*=\\s*");
@@ -85,8 +85,8 @@ public class MainScreen {
                 updateLanguages();
 
                 successLog(" Language added successfully: " + value.toString());
-            } else if (rawInput.matches("[a-zA-Z0-9\\s∪\\-*'∩Δ{},]+")) {
-                successLog(" " + Evaluator.evaluate(rawInput).toString());
+            } else if (rawInput.matches("[a-zA-Z0-9\\s∪\\-*+'×∩Δ{},]+")) {
+                successLog(" " + Evaluator.evaluate(rawInput).print());
             } else {
                 throw new InvalidSyntaxException(" Syntax error");
             }
@@ -105,10 +105,12 @@ public class MainScreen {
     }
     private void updateLanguages() throws InvalidLanguageException {
         String[] keys = Languages.getLanguages().keySet().toArray(new String[0]);
-        languagesTextArea.setText("");
+        StringBuilder buf = new StringBuilder();
 
         for(String k : keys)
-            languagesTextArea.append(k + " = " + Languages.getOne(k).toString() + "\n");
+            buf.append(k).append(" = ").append(Languages.getOne(k).print()).append("\n");
+
+        languageTextPane.setText(buf.toString());
     }
 
     public void normalLog(String s) {
@@ -146,6 +148,7 @@ public class MainScreen {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 int key = e.getKeyCode();
+                System.out.println(key);
 
                 if(mode == Mode.SHORTCUT) {
                     StringBuilder buf = new StringBuilder(commandTextField.getText());
@@ -164,7 +167,7 @@ public class MainScreen {
                         buf.insert(caretPosition, "Δ");
                     } else if (key == 80) {
                         //product
-                        buf.insert(caretPosition, "*");
+                        buf.insert(caretPosition, "×");
                     }else if (key == 67) {
                         //complement
                         buf.insert(caretPosition, "'");
@@ -200,11 +203,14 @@ public class MainScreen {
 
     public static void main(String[] args) {
         JFrame ms = new JFrame();
+
+        ms.setLocationRelativeTo(null);
+
         ms.setContentPane(new MainScreen().mainPanel);
         ms.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ms.setSize( 800, 600);
-        ms.setLocationRelativeTo(null);
+
         ms.pack();
+
         ms.setVisible(true);
     }
 }
