@@ -17,8 +17,8 @@ public class Evaluator {
             if(tokens[i] >= '0' && tokens[i] <= '9')
                 throw  new InvalidLanguageException("Syntax error. Language name must start with a letter");
 
-            if ((tokens[i] >= 65 && tokens[i] <= 90) ||
-                    (tokens[i] >= 97 && tokens[i] <= 122)) {
+            if ((tokens[i] >= 'a' && tokens[i] <= 'z') ||
+                    (tokens[i] >= 'A' && tokens[i] <= 'Z' || tokens[i] == '$' || tokens[i] == '_')) {
                 //Obtains the full name of the found language
                 StringBuilder buf = new StringBuilder();
                 while (i < tokens.length && !isDelimiter(tokens[i])) {
@@ -36,7 +36,7 @@ public class Evaluator {
                     i++;
 
                 if(i == tokens.length)
-                    throw new InvalidSyntaxException(" Invalid Inline language");
+                    throw new InvalidSyntaxException(" Syntax error. Missing }");
 
                 String subL = expression.substring(ini, i);
 
@@ -46,6 +46,8 @@ public class Evaluator {
                 } else {
                     values.push(new Language(subLSSplit));
                 }
+            }  else if(tokens[i] == '}') {
+                throw new InvalidLanguageException(" Syntax error. Missing {");
             } else if (tokens[i] == '(') {
                 operators.push(tokens[i]);
             }
@@ -55,7 +57,7 @@ public class Evaluator {
                 operators.pop();
             }
             else if (isOperator(tokens[i])) {
-                while(!operators.isEmpty() && operators.peek() != '(')
+                while(!operators.isEmpty() && precedence(operators.peek()) >= precedence(tokens[i]))
                     applyOp(operators, values);
                 operators.push(tokens[i]);
             }
@@ -64,7 +66,9 @@ public class Evaluator {
         while(!operators.isEmpty())
             applyOp(operators, values);
 
-        return values.pop();
+        Language ret = values.pop();
+        System.out.println("Size: " + ret.size());
+        return ret;
     }
 
     private static void applyOp(Stack<Character> operators, Stack<Language> values) {
@@ -108,5 +112,13 @@ public class Evaluator {
                 token == '('  || token == ')' || token == '\'' ||
                 token == '*'  || token == '∪' || token == '∩'  ||
                 token == 'Δ'  || token == '-' || token == '+' || token == '×');
+    }
+    private static int precedence(char token) {
+        if(token == '\'' || token == '∪' || token == '∩'  ||
+                token == 'Δ' || token == '-' || token == '×')
+            return 1;
+        if(token == '*' || token == '+')
+            return 2;
+        return 0;
     }
 }

@@ -57,19 +57,17 @@ public class Languages {
         return r;
     }
     public static Language kleeneClosure(Language a) {
-        //
         Language r = new Language();
 
-        for(int i = 0; i <= 3; i++)
+        for(int i = 0; i <= 1; i++)
             r.addAll(power(a, i));
 
         return r;
     }
     public static Language positiveClosure(Language a) {
-        //ε
         Language r = new Language();
 
-        for(int i = 1; i <= 3; i++)
+        for(int i = 2; i <= 2; i++)
             r.addAll(power(a, i));
 
         System.out.println(a.size());
@@ -81,9 +79,11 @@ public class Languages {
         if(n == 0)
             return new Language(new String[]{""});
         Language r = new Language(a);
+
         for(int i = 1; i < n; i++) {
             r = product(a, r);
         }
+
         return r;
     }
 
