@@ -5,6 +5,7 @@ Hasta el momento, el programa permite realizar lo siguiente:
 * Introducir un solo alfabeto
 * Definir lenguajes con valores literales u operaciones
 * Realizar unión, intersección, diferencia, diferencia simétrica, producto, complemento, cerradura de Kleene y cerradura positiva.
+* Insertar caracteres especiales para las operaciones con atajos de teclado
 * Realizar operaciones con lenguajes no definidos formalmente (operaciones con lenguajes en línea)
 * Leer archivos de texto con las instrucciones a realizar
 * Leer los errores al momento de ejecutar las instrucciones
