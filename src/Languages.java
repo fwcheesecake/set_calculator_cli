@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class Languages {
+    private static int nKleene = 3;
+    private static int nPositive = 3;
     private Languages() {
 
     }
@@ -56,21 +58,21 @@ public class Languages {
                 r.add(s + t);
         return r;
     }
-    public static Language kleeneClosure(Language a) {
+
+    public static Language positiveClosure(Language a) {
         Language r = new Language();
 
-        for(int i = 0; i <= 1; i++)
+        for(int i = 2; i <= nPositive + 1; i++)
             r.addAll(power(a, i));
 
         return r;
     }
-    public static Language positiveClosure(Language a) {
+
+    public static Language kleeneClosure(Language a) {
         Language r = new Language();
 
-        for(int i = 2; i <= 2; i++)
+        for(int i = 0; i <= nKleene; i++)
             r.addAll(power(a, i));
-
-        System.out.println(a.size());
 
         return r;
     }
@@ -85,6 +87,14 @@ public class Languages {
         }
 
         return r;
+    }
+
+    public static void setnKleene(int n) {
+        nKleene = n;
+    }
+
+    public static void setnPositive(int n) {
+        nPositive = n;
     }
 
     public static boolean isValid(String[] values) {

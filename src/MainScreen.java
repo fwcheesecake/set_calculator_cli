@@ -9,6 +9,9 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,20 +35,27 @@ public class MainScreen {
     private final Stack<String> prev = new Stack<>();
     private final Stack<String> next = new Stack<>();
 
-    private void enterPressed() {
-        //Reads the input
-        String rawInput = commandTextField.getText();
-
+    private void enterPressed(String rawInput) {
         //Prints the command in the screen
         normalLog(">>> " + rawInput);
 
         try {
-            if (rawInput.equals("universe")) { // If input is "universe"
+            if(rawInput.isEmpty()) {
+                return;
+            } else if(rawInput.startsWith("#")) {
+                commentLog(rawInput.substring(1).trim());
+            } else if (rawInput.equals("universe")) { // If input is "universe"
                 normalLog(" U = " + Languages.getUniverse().print()); // Just print the universe
             } else if (rawInput.equals("exit")) { // If input is "exit"
                 System.exit(0); // Kill the program
             } else if (rawInput.equals("clear")) { // If input is "clear"
                 outputTextPane.setText(""); // Clear the screen
+            } else if (rawInput.matches("^kleene\\s+\\d+$")) {
+                int n = Integer.parseInt(rawInput.split("\\s+")[1]);
+                Languages.setnKleene(n);
+            } else if (rawInput.matches("^positive\\s+\\d+$")) {
+                int n = Integer.parseInt(rawInput.split("\\s+")[1]);
+                Languages.setnPositive(n);
             } else if(rawInput.matches("^alphabet.*$")) { // Check if it's an alphabet initialization
                 if (rawInput.matches("^alphabet\\s*=\\s*\\{(.{1}\\s*,{1}\\s*)*.}$")) { // Check if the syntax is correct
                     if (Languages.getAlphabet().isEmpty()) { // If the alphabet it's not set
@@ -125,6 +135,17 @@ public class MainScreen {
 
     public void normalLog(String s) {
         StyleConstants.setForeground(attrs, Color.BLACK);
+        StyleConstants.setItalic(attrs, false);
+        try {
+            outputTextPane.getStyledDocument().insertString(
+                    outputTextPane.getStyledDocument().getLength(), s + '\n', attrs);
+        } catch (BadLocationException ex) {
+            Logger.getLogger(MainScreen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public void commentLog(String s) {
+        StyleConstants.setForeground(attrs, Color.GRAY);
+        StyleConstants.setItalic(attrs, true);
         try {
             outputTextPane.getStyledDocument().insertString(
                     outputTextPane.getStyledDocument().getLength(), s + '\n', attrs);
@@ -134,6 +155,7 @@ public class MainScreen {
     }
     public void errorLog(String s) {
         StyleConstants.setForeground(attrs, Color.RED);
+        StyleConstants.setItalic(attrs, false);
         try {
             outputTextPane.getStyledDocument().insertString(
                     outputTextPane.getStyledDocument().getLength(), s + '\n', attrs);
@@ -143,6 +165,7 @@ public class MainScreen {
     }
     public void successLog(String s) {
         StyleConstants.setForeground(attrs, new Color(50, 168, 82));
+        StyleConstants.setItalic(attrs, false);
         try {
             outputTextPane.getStyledDocument().insertString(
                     outputTextPane.getStyledDocument().getLength(), s + '\n', attrs);
@@ -152,7 +175,24 @@ public class MainScreen {
     }
 
     public MainScreen() {
-        enterButton.addActionListener(e -> enterPressed());
+        enterButton.addActionListener(e -> {
+            final JFileChooser fc = new JFileChooser();
+            int val = fc.showOpenDialog(mainPanel);
+
+            if(val == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                try {
+                    Scanner sc = new Scanner(file);
+                    while(sc.hasNextLine()) {
+                        enterPressed(sc.nextLine());
+                    }
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                errorLog(" Canceled by the user");
+            }
+        });
         commandTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -189,7 +229,10 @@ public class MainScreen {
                 if(key == 17) {
                     mode = Mode.SHORTCUT;
                 } else if (key == 10) {
-                    enterPressed();
+                    //Reads the input
+                    String rawInput = commandTextField.getText();
+
+                    enterPressed(rawInput);
                 } else if(key == 38) {
                     //Up key
                     if(!prev.isEmpty()) {
@@ -212,6 +255,9 @@ public class MainScreen {
 
     public static void main(String[] args) {
         JFrame ms = new JFrame();
+
+        ms.setSize(1280, 720);
+        ms.setResizable(false);
 
         ms.setLocationRelativeTo(null);
 
